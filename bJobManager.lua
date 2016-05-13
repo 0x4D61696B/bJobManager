@@ -4,7 +4,6 @@
 -- =============================================================================
 
 require "math"
-require "string"
 require "table"
 require "unicode"
 require "lib/lib_Callback2"
@@ -23,13 +22,13 @@ local g_ArcCompleted = false
 local g_ArcId = 0
 local g_ArcRepeat = false
 local g_Debug = false
-local c_HelpText = "/bjm <cancel|debug|restart|start|status|toggle>" ..
-        "\n\tcancel - Cancels the current job" ..
-        "\n\tdebug - Enables or disables the debug mode" ..
-        "\n\trestart - Restarts the current job" ..
-        "\n\tstart arc_id - Tries to start the job with the corresponding arc_id" ..
-        "\n\tstatus - Returns some information about the current job and addon state" ..
-        "\n\ttoggle - Enables or disables the repetition of jobs"
+local c_HelpText = [[/bjm <cancel|debug|restart|start|status|toggle>
+	cancel - Cancels the current job
+	debug - Enables or disables the debug mode
+	restart - Restarts the current job
+	start arc_id - Tries to start the job with the corresponding arc_id
+	status - Returns some information about the current job and addon state
+	toggle - Enables or disables the repetition of jobs]]
 
 
 -- =============================================================================
@@ -43,9 +42,9 @@ end
 function GetJobStatus()
     local stateText = function(state) if (state) then return "enabled" else return "disabled" end end
     local jobStatus = Player.GetJobStatus()
-    
+
     Debug.Table("GetJobStatus()", jobStatus)
-    
+
     if (jobStatus and jobStatus.completion_percent and jobStatus.job and jobStatus.job.arc_id) then
         Debug.Table("jobStatus", jobStatus)
         Notification("Current job info:\n\tID: " .. jobStatus.job.arc_id ..
@@ -54,15 +53,15 @@ function GetJobStatus()
     else
         Notification("Unable to get job info: no job status was found")
     end
-    
+
     Notification("Repetition of current job is " .. stateText(g_ArcRepeat))
 end
 
 function RequestCancelArc()
     local jobStatus = Player.GetJobStatus()
-    
+
     Debug.Table("RequestCancelArc()", jobStatus)
-    
+
     if (jobStatus and jobStatus.job and jobStatus.job.arc_id) then
         Notification("Canceling job " .. jobStatus.job.arc_id .. ": " .. jobStatus.job.name)
         Game.RequestCancelArc(jobStatus.job.arc_id)
@@ -75,14 +74,14 @@ function RequestStartArc(arcId)
     if (Player.GetJobStatus()) then
         RequestCancelArc()
     end
-    
+
     Notification("Trying to start job with id " .. arcId .. " in 3 seconds")
     Callback2.FireAndForget(Game.RequestStartArc, arcId, 3)
 end
 
 function RestartArc()
     local jobStatus = Player.GetJobStatus()
-    
+
     if (jobStatus and jobStatus.job and jobStatus.job.arc_id) then
         RequestStartArc(jobStatus.job.arc_id)
     else
@@ -93,7 +92,7 @@ end
 function ToggleDebug()
     local stateText = function(state) if (state) then return "enabled" else return "disabled" end end
     g_Debug = not g_Debug
-    
+
     Debug.EnableLogging(g_Debug)
     Notification("Debug mode " .. stateText(g_Debug))
 end
@@ -101,7 +100,7 @@ end
 function ToggleRepetition()
     local stateText = function(state) if (state) then return "enabled" else return "disabled" end end
     g_ArcRepeat = not g_ArcRepeat
-    
+
     Notification("Repetition of current job " .. stateText(g_ArcRepeat))
 end
 
@@ -151,7 +150,7 @@ end
 
 function OnArcStatusChanged(args)
     Debug.Table("OnArcStatusChanged()", args)
-    
+
     if (g_ArcRepeat) then
         if (args.percent_complete and args.percent_complete == 100) then
             Debug.Log("percent_complete is 100, waiting for ON_ARC_STATUS_CHANGED event")
